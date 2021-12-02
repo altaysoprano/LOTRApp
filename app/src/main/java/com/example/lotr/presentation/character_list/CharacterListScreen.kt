@@ -27,34 +27,51 @@ fun CharacterListScreen(
 ) {
     val state = characterListViewModel.state.value
     val limit = characterListViewModel.limit.value
+    val searchTextState by characterListViewModel.searchTextState
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = {
+            SearchAppBar(
+                text = searchTextState,
+                onTextChange = {
+                    characterListViewModel.updateSearchTextState(it)
+                    Log.d("searchtextstate", it)
+                    characterListViewModel.searchCharacters("/${searchTextState}/i", limit, Constants.HEADER)
+                },
+                onCloseClicked = {},
+                onSearchClicked = {characterListViewModel.searchCharacters("/" + searchTextState + "/i", limit, Constants.HEADER)}
+            )
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
 
-        val listState = rememberLazyListState()
+            val listState = rememberLazyListState()
 
-        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
-            itemsIndexed(state.characters) { index, character ->
-                characterListViewModel.onChangeRecipeScrollPosition(index)
-                if ((index + 1) >= limit) {
-                    characterListViewModel.nextPage()
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+                itemsIndexed(state.characters) { index, character ->
+                    characterListViewModel.onChangeRecipeScrollPosition(index)
+                    if ((index + 1) >= limit) {
+                        characterListViewModel.nextPage()
+                    }
+                    CharacterListItem(character = character)
                 }
-                CharacterListItem(character = character)
+            }
+
+            if (state.error.isNotBlank()) {
+                Text(
+                    text = state.error,
+                    color = MaterialTheme.colors.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .align(Alignment.Center)
+                )
+            }
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
 
-        if (state.error.isNotBlank()) {
-            Text(
-                text = state.error,
-                color = MaterialTheme.colors.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .align(Alignment.Center)
-            )
-        }
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
     }
 }

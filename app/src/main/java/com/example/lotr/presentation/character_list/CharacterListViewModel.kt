@@ -1,6 +1,8 @@
 package com.example.lotr.presentation.character_list
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,13 +24,30 @@ class CharacterListViewModel @Inject constructor(
     val state = mutableStateOf(CharacterListState())
     val limit = mutableStateOf(20)
     var recipeListScrollPosition = 0
+    val searchTextState: MutableState<String> = mutableStateOf(value = "")
 
     init {
-        getCharacters(limit.value, Constants.HEADER)
+        searchCharacters("/${searchTextState.value}/i", limit.value, Constants.HEADER)
     }
 
     private fun getCharacters(limit : Int, header : String) {
         characterRepository.getCharacters(limit, header).onEach { result ->
+            when(result) {
+                is Resource.Success -> {
+                    state.value = CharacterListState(characters = result.data ?: emptyList())
+                }
+                is Resource.Error -> {
+                    state.value = CharacterListState(error = result.message ?: "Unexpected Error")
+                }
+                is Resource.Loading -> {
+                    state.value = CharacterListState(isLoading = true)
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    fun searchCharacters(name: String, limit : Int, header : String) {
+        characterRepository.searchCharacters(name, limit, header).onEach { result ->
             when(result) {
                 is Resource.Success -> {
                     state.value = CharacterListState(characters = result.data ?: emptyList())
@@ -67,4 +86,9 @@ class CharacterListViewModel @Inject constructor(
                     }
                 }.launchIn(viewModelScope)
     }
+
+    fun updateSearchTextState(newValue: String) {
+        searchTextState.value = newValue
+    }
+
 }

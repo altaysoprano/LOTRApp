@@ -11,5 +11,5 @@ data class Character(
     val race: String,
     val realm: String,
     val spouse: String,
-    val wikiUrl: String
+    val wikiUrl: String?
 )

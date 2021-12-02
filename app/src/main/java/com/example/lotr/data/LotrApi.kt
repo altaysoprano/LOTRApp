@@ -32,4 +32,11 @@ interface LotrApi {
         @Query("limit") limit : Int,
         @Header("Authorization") authHeader : String
     ): CharacterListDto
+
+    @GET("character")
+    suspend fun searchCharacters(
+        @Query("name") name : String,
+        @Query("limit") limit : Int,
+        @Header("Authorization") authHeader : String
+    ): CharacterListDto
 }

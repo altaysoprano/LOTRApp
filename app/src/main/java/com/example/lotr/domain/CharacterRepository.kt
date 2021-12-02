@@ -25,6 +25,19 @@ class CharacterRepository @Inject constructor(
         catch(e : IOException) {
             emit(Resource.Error<List<Character>>("Please check your internet connection"))
         }
-
     }
+
+    fun searchCharacters(name : String, limit : Int, header : String) : Flow<Resource<List<Character>>> = flow {
+        try {
+            emit(Resource.Loading<List<Character>>())
+            val characters = api.searchCharacters(name, limit, header).CharachterListDtoToCharacterList()
+            emit(Resource.Success<List<Character>>(characters))
+        }catch (e: HttpException) {
+            emit(Resource.Error<List<Character>>("Unexpected Error"))
+        }
+        catch(e : IOException) {
+            emit(Resource.Error<List<Character>>("Please check your internet connection"))
+        }
+    }
+
 }

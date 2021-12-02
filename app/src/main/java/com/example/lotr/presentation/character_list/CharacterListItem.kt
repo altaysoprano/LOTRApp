@@ -163,7 +163,7 @@ fun CharacterListItem(
                         style = MaterialTheme.typography.h5,
                         overflow = TextOverflow.Ellipsis
                     )
-                    AnnotatedClickableText(character.wikiUrl)
+                    AnnotatedClickableText(character.wikiUrl ?: "")
                 }
             }
         }
